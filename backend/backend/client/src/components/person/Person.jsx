@@ -1,11 +1,11 @@
 import { useEffect, useState } from "react";
-import { useForm } from "react-hook-form";
-import axios from "axios";
-import toast from "react-hot-toast";
 import PersonForm from "./PersonForm";
-import PersonList from "./PersonList";
+import PersonList from "./Personlist";
+import { useForm } from "react-hook-form";
+import toast from "react-hot-toast";
+import axios from "axios";
 
-const Person = () => {
+function Person() {
   const BASE_URL = import.meta.env.VITE_BASE_API_URL + "/people";
 
   const [people, setPeople] = useState([]);
@@ -22,85 +22,78 @@ const Person = () => {
     defaultValues: defaultFormValues,
   });
 
-  // Charger toutes les personnes au démarrage
   useEffect(() => {
     const loadPeople = async () => {
       try {
-        const response = await axios.get(BASE_URL);
-        setPeople(response.data);
+        const peopleData = (await axios.get(BASE_URL)).data;
+        setPeople(peopleData);
       } catch (error) {
-        console.error(error);
-        toast.error("Error loading data!");
+        console.log(error);
+        toast.error("Error has occured!");
       } finally {
         setLoading(false);
       }
     };
 
     loadPeople();
-  }, [BASE_URL]);
+  }, []);
 
-  // Pré-remplir le formulaire lors d'un clic sur Edit
   useEffect(() => {
     if (editData) {
       methods.reset(editData);
     }
-  }, [editData, methods]);
+  }, [editData]);
 
-  // Réinitialiser le formulaire
   const handleFormReset = () => {
     methods.reset(defaultFormValues);
     setEditData(null);
   };
 
-  // Ajouter ou modifier une personne
   const handleFormSubmit = async (person) => {
     setLoading(true);
     try {
       if (person.id <= 0) {
-        // Ajout (POST)
-        const response = await axios.post(BASE_URL, person);
-        setPeople((prevPeople) => [...prevPeople, response.data]);
-        toast.success("Saved successfully!");
+        const createdPerson = (await axios.post(BASE_URL, person)).data;
+        setPeople((previousPerson) => [...previousPerson, createdPerson]);
       } else {
-        // Modification (PUT)
         await axios.put(`${BASE_URL}/${person.id}`, person);
-        setPeople((prevPeople) =>
-          prevPeople.map((p) => (p.id === person.id ? person : p))
+        setPeople((previousPeople) =>
+          previousPeople.map((p) => (p.id === person.id ? person : p))
         );
-        toast.success("Updated successfully!");
       }
-      handleFormReset();
+      methods.reset(defaultFormValues);
+      setEditData(null);
+      toast.success("Saved successfully!");
     } catch (error) {
-      console.error(error);
-      toast.error("Operation failed!");
+      console.log(error);
+      toast.error("Error has occured!");
     } finally {
       setLoading(false);
     }
   };
 
-  // Sélectionner une personne à modifier
   const handlePersonEdit = (person) => {
     setEditData(person);
   };
 
-  // Supprimer une personne (DELETE)
   const handlePersonDelete = async (person) => {
     if (
-      !window.confirm(
-        `Are you sure to delete : ${person.firstName} ${person.lastName}?`
+      !confirm(
+        `Are you sure to delete a person : ${person.firstName} ${person.lastName}`
       )
     ) {
       return;
     }
-
     setLoading(true);
     try {
       await axios.delete(`${BASE_URL}/${person.id}`);
-      setPeople((prevPeople) => prevPeople.filter((p) => p.id !== person.id));
+      setPeople((previousPerson) =>
+        previousPerson.filter((p) => p.id !== person.id)
+      );
       toast.success("Deleted successfully!");
     } catch (error) {
-      console.error(error);
-      toast.error("Delete failed!");
+      console.log(error);
+      toast.error("Error on deleting!");
     } finally {
       setLoading(false);
     }
@@ -108,18 +101,18 @@ const Person = () => {
 
   return (
     <div className="min-h-screen bg-gray-50 py-8">
-      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6">
         <div className="text-center mb-8">
           <h1 className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
             Person Management
           </h1>
-          {loading && <p className="text-sm text-gray-500 mt-2">Loading...</p>}
+          {loading && <p>Loading...</p>}
         </div>
 
         <PersonForm
           methods={methods}
-          onFormReset={handleFormReset}
           onFormSubmit={handleFormSubmit}
+          onFormReset={handleFormReset}
         />
 
         <PersonList
@@ -130,6 +123,6 @@ const Person = () => {
       </div>
     </div>
   );
-};
+}
 
 export default Person;

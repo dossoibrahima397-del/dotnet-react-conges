@@ -15,15 +15,13 @@ namespace backend.Properties.Controllers
             _context = context;
         }
 
-        [HttpPost] // POST /api/people
+        [HttpPost]
         public async Task<IActionResult> AddPerson(Person person)
         {
             try
             {
                 _context.People.Add(person);
                 await _context.SaveChangesAsync();
-
-                // Retourne le code 201 Created + l'URL de la ressource + l'objet créé
                 return CreatedAtRoute("Getperson", new { id = person.Id }, person);
             }
             catch (Exception ex)
@@ -32,13 +30,13 @@ namespace backend.Properties.Controllers
             }
         }
 
-        [HttpGet] // GET /api/people 
+        [HttpGet]
         public async Task<IActionResult> GetPeople()
         {
             try
             {
                 var people = await _context.People.ToListAsync();
-                return Ok(people); // 200 OK + liste de toutes les personnes
+                return Ok(people);
             }
             catch (Exception ex)
             {
@@ -46,7 +44,7 @@ namespace backend.Properties.Controllers
             }
         }
 
-        [HttpGet("{id:int}", Name = "Getperson")] // GET /api/people/1
+        [HttpGet("{id:int}", Name = "Getperson")]
         public async Task<IActionResult> Getperson(int id)
         {
             try
@@ -54,10 +52,10 @@ namespace backend.Properties.Controllers
                 var person = await _context.People.FindAsync(id);
                 if (person is null)
                 {
-                    return NotFound(); // 404 Not Found
+                    return NotFound();
                 }
 
-                return Ok(person); // 200 OK + objet person
+                return Ok(person);
             }
             catch (Exception ex)
             {
@@ -65,23 +63,23 @@ namespace backend.Properties.Controllers
             }
         }
 
-        [HttpPut("{id:int}")] // PUT /api/people/1
+        [HttpPut("{id:int}")]
         public async Task<IActionResult> UpdatePerson(int id, [FromBody] Person person)
         {
             try
             {
                 if (id != person.Id)
                 {
-                    return BadRequest("id in Url and body mismatches"); // 400 + message in the body
+                    return BadRequest("id in Url and body mismatches");
                 }
                 if (!await _context.People.AnyAsync(p => p.Id == id))
                 {
-                    return NotFound(); // 404   
+                    return NotFound();
                 }
 
                 _context.People.Update(person);
                 await _context.SaveChangesAsync();
-                return NoContent(); // 204 status code
+                return NoContent();
             }
             catch (Exception ex)
             {
@@ -89,7 +87,7 @@ namespace backend.Properties.Controllers
             }
         }
 
-        [HttpDelete("{id:int}")] // DELETE /api/people/1
+        [HttpDelete("{id:int}")]
         public async Task<IActionResult> DeletePerson(int id)
         {
             try
@@ -97,12 +95,12 @@ namespace backend.Properties.Controllers
                 var person = await _context.People.FindAsync(id);
                 if (person is null)
                 {
-                    return NotFound(); // 404 not found status code
+                    return NotFound();
                 }
 
                 _context.People.Remove(person);
                 await _context.SaveChangesAsync();
-                return NoContent(); // 204 status code
+                return NoContent();
             }
             catch (Exception ex)
             {
@@ -111,5 +109,3 @@ namespace backend.Properties.Controllers
         }
     }
 }
-//server app : localhost: 3000
-//client app (app js) : htpp//localhost/5713 => CORS

@@ -22,7 +22,18 @@ builder.Services.AddControllers();
 string connectionString = "Data Source=person.db";
 builder.Services.AddDbContext<AppDbContext>(op => op.UseSqlite(connectionString));
 
+// 1. AJOUT : Services pour Swagger
+builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddSwaggerGen();
+
 var app = builder.Build();
+
+// 2. AJOUT : Activation de l'interface Swagger en développement
+if (app.Environment.IsDevelopment())
+{
+    app.UseSwagger();
+    app.UseSwaggerUI();
+}
 
 // Activation du middleware CORS (obligatoirement AVANT MapControllers)
 app.UseCors(MyAllowSpecificOrigins);
